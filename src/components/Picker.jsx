@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import classnames from 'classnames'
-import { showPicker, closePicker, selectTab, setColor } from '../actions'
-import { hex, fromRgb, rgb } from '../data/Color'
+import { setColor } from '../actions'
+import { hex, fromRgb, rgb, rgbString, fromHsl, hsl, hslString } from '../data/Color'
 import * as tabs from '../constants/Tabs'
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/outline'
 import * as util from '../util'
 
 export default function Picker() {
   const color = useSelector(state => state.color)
-  const editing = useSelector(state => state.editing)
   const dispatch = useDispatch()
 
   const [tab, setTab] = useState(tabs.RGB)
@@ -17,10 +15,10 @@ export default function Picker() {
   const selectors = () => {
     switch(tab) {
       case tabs.RGB:
-        return <RGBPicker color={color} onColorChange={(color) => dispatch(setColor(color))}/>
+        return <RGBPicker color={color} onColorChange={(color) => dispatch(setColor(color))} />
 
       case tabs.HSL:
-        return <HSLPicker />
+        return <HSLPicker color={color} onColorChange={(color) => dispatch(setColor(color))} />
 
       case tabs.CMYK:
         return <CMYKPicker />
@@ -31,58 +29,35 @@ export default function Picker() {
   }
 
   return (
-    <div className="relative">
-      <div
-        style={{ backgroundColor: hex(color) }}
-        className="w-40 h-40 rounded overflow-hidden relative group"
-      >
-        <button
-          className={classnames(
-            "block w-full p-2 text-indigo-500 bg-white absolute left-0 bottom-0 transition transition-all duration-200 transform translate-y-full flex flex-col items-center focus:outline-none", {
-              "group-hover:translate-y-0": !editing,
-            }
-          )}
-          onClick={() => dispatch(showPicker())}
-        >
-          <ChevronUpIcon className="w-5 h-5" />
-          <span className="uppercase text-xs font-medium">Pick Color</span>
-        </button>
-      </div>
-      <div
-        className={classnames(
-          "absolute -top-1/2 left-1/2 transform -translate-x-1/2 transition transition-all duration-300 bg-white shadow-lg", {
-            "translate-y-10 opacity-0 pointer-events-none": !editing
-          }
-        )}
-      >
-        <div className="flex items-stretch select-none">
-          <Preview />
-          <div className="flex flex-col items-stretch w-60">
-            <nav className="flex px-2">
-              <Tab tab={tabs.RGB} selected={tab == tabs.RGB} onSelect={setTab} />
-              <Tab tab={tabs.HSL} selected={tab == tabs.HSL} onSelect={setTab} />
-              <Tab tab={tabs.CMYK} selected={tab == tabs.CMYK} onSelect={setTab} />
-            </nav>
-            {selectors()}
-          </div>
-        </div>
-        <button
-          className="block w-full p-2 text-indigo-500 hover:bg-indigo-100 focus:outline-none flex flex-col items-center"
-          onClick={() => dispatch(closePicker())}
-        >
-          <span className="uppercase text-xs font-medium">Close</span>
-          <ChevronDownIcon className="w-5 h-5" />
-        </button>
+    <div className="flex items-stretch">
+      <Preview color={color}/>
+      <div className="flex flex-col items-stretch w-60 select-none">
+        <nav className="flex px-2">
+          <Tab tab={tabs.RGB} selected={tab == tabs.RGB} onSelect={setTab} />
+          <Tab tab={tabs.HSL} selected={tab == tabs.HSL} onSelect={setTab} />
+          <Tab tab={tabs.CMYK} selected={tab == tabs.CMYK} onSelect={setTab} />
+        </nav>
+        {selectors()}
       </div>
     </div>
   )
 }
 
-const Preview = () =>
-  <div className="w-40 bg-gray-200">
+const Preview = ({ color }) =>
+  <div className="flex flex-col w-60 p-4 bg-gray-200 space-y-4">
+    <div className="flex flex-grow justify-center items-center">
+      <div
+        className="w-20 h-20 rounded-full"
+        style={{ background: hex(color) }}
+      >
+      </div>
+    </div>
+    <div className="bg-white p-1 rounded-sm text-sm">{hex(color)}</div>
+    <div className="bg-white p-1 rounded-sm text-sm">{rgbString(color)}</div>
+    <div className="bg-white p-1 rounded-sm text-sm">{hslString(color)}</div>
   </div>
 
-const Tab = ({ tab, selected = False, onSelect }) => {
+const Tab = ({ tab, selected, onSelect }) => {
   return (
     <span
       className={classnames(
@@ -105,30 +80,54 @@ const RGBPicker = ({ color, onColorChange }) => {
   const setComp = (comp) =>
     fromRgb({...rgbColor, ...comp})
 
-  const entry = (name, slider) =>
-    <div className="w-full space-y-1">
-      <h4 className="font-medium text-sm">
-        {name}
-      </h4>
-      {slider}
-    </div>
-
   return (
     <div className="w-full p-4 space-y-4">
-      {entry('Red', <Slider min={0} max={250} value={rgbColor.red} from={setComp({ red: 0 })} to={setComp({ red: 255 })} onChange={(r) => onColorChange(setComp({ red: r }))} />)}
-      {entry('Green', <Slider min={0} max={250} value={rgbColor.green} from={setComp({ green: 0 })} to={setComp({ green: 255 })} onChange={(g) => onColorChange(setComp({ green: g }))} />)}
-      {entry('Blue', <Slider min={0} max={250} value={rgbColor.blue} from={setComp({ blue: 0 })} to={setComp({ blue: 255 })} onChange={(b) => onColorChange(setComp({ blue: b }))} />)}
+      <Entry name="Red">
+        <Slider min={0} max={255} value={rgbColor.red} colorStop={(r) => setComp({ red: r })} onChange={onColorChange} />
+      </Entry>
+      <Entry name="Green">
+        <Slider min={0} max={255} value={rgbColor.green} colorStop={(g) => setComp({ green: g })} onChange={onColorChange} />
+      </Entry>
+      <Entry name="Blue">
+        <Slider min={0} max={255} value={rgbColor.blue} colorStop={(b) => setComp({ blue: b })} onChange={onColorChange} />
+      </Entry>
     </div>
   )
 }
 
-const HSLPicker = () =>
-  <div></div>
+const HSLPicker = ({ color, onColorChange }) => {
+  const hslColor = hsl(color)
+
+  const setComp = (comp) =>
+    fromHsl({...hslColor, ...comp})
+
+  return (
+    <div className="w-full p-4 space-y-4">
+      <Entry name="Hue">
+        <Slider min={0} max={360} value={hslColor.hue} colorStop={(h) => setComp({ hue: h })} stops={[60, 120, 180, 240, 300]} onChange={onColorChange} />
+      </Entry>
+      <Entry name="Saturation">
+        <Slider min={0} max={100} value={hslColor.saturation} colorStop={(s) => setComp({ saturation: s })} onChange={onColorChange} />
+      </Entry>
+      <Entry name="Lightness">
+        <Slider min={0} max={100} value={hslColor.lightness} colorStop={(l) => setComp({ lightness: l })} stops={[50]} onChange={onColorChange} />
+      </Entry>
+    </div>
+  )
+}
 
 const CMYKPicker = () =>
   <div></div>
 
-const Slider = ({ min, max, value, from, to, onChange }) => {
+const Entry = ({ name, children }) =>
+  <div className="w-full space-y-1">
+    <h4 className="font-medium text-sm">
+      {name}
+    </h4>
+    {children}
+  </div>
+
+const Slider = ({ min, max, value, colorStop, stops = [], onChange }) => {
   const sliderRef = useRef(null)
   const [ width, setWidth ] = useState(0)
   const [ dragging, setDragging ] = useState(false)
@@ -172,7 +171,7 @@ const Slider = ({ min, max, value, from, to, onChange }) => {
   useEffect(() => {
     if (drag) {
       let l = getPostion()
-      onChange(util.linearScale(0, width, min, max, l))
+      onChange(colorStop(util.linearScale(0, width, min, max, l)))
     }
   }, [drag])
 
@@ -180,7 +179,7 @@ const Slider = ({ min, max, value, from, to, onChange }) => {
     <div
       ref={sliderRef}
       className="w-full h-5 relative"
-      style={{ backgroundImage: `linear-gradient(to right, ${hex(from)}, ${hex(to)}`}}
+      style={{ backgroundImage: `linear-gradient(to right, ${[min, ...stops, max].map(colorStop).map(hex).join(",")}` }}
       onMouseMove={dragging ? (e) => dragTo(e.pageX) : null}
     >
       <span
