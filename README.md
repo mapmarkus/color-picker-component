@@ -5,7 +5,7 @@ Color picker component using React + Redux
 ![Demo](screencapture.gif)
 
 **Note**: I've built this to learn React + Redux, it's not an actual usable
-component :sad:.
+component 😔.
 
 ## Stack
 
