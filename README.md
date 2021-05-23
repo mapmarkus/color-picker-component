@@ -11,8 +11,7 @@ component 😔.
 
 - Vite2
 - Tailwind 2.1, with Jit
-- React
-- Redux
+- React + Redux
 
 ## Dev
 
