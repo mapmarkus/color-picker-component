@@ -1,0 +1,7 @@
+:root {
+  --main-font: "IBM Plex Sans"
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
