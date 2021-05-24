@@ -7,7 +7,7 @@ import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/outline'
 import Picker from './Picker'
 
 export default function App() {
-  const color = useSelector(state => state.color)
+  const color = useSelector(state => state.color.value)
   const editing = useSelector(state => state.editing)
   const dispatch = useDispatch()
 
