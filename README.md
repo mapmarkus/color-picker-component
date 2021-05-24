@@ -11,8 +11,8 @@ Supports RGB, HSL and CMYK color spaces.
 
 ## Stack
 
-- Vite2
-- Tailwind 2.1, with Jit
+- Vite 2
+- Tailwind 2.1, (with JIT)
 - React + Redux
 
 ## Dev
