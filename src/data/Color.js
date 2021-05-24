@@ -1,4 +1,4 @@
-import { clamp } from '../util'
+import { clamp, interpolate, param } from '../util'
 
 export const Color = ({ r = 0, g = 0, b = 0 } = {}) => ({ r, g, b })
 
@@ -54,7 +54,19 @@ export const rgb = ({ r, g, b } = {}) => ({
   blue: clamp(0, 255, Math.round(b * 255)),
 })
 
-export const cmyk = (color) => ({ cyan: 0, magenta: 0, yellow: 0, black: 0 })
+export const cmyk = ({ r, g, b } = {}) => {
+  const c = 1 - r
+  const m = 1 - g
+  const y = 1 - b
+  const k = Math.min(c, m, y)
+
+  return {
+    cyan: clamp(0, 100, Math.round(param(k, 1, c) * 100)),
+    magenta: clamp(0, 100, Math.round(param(k, 1, m) * 100)),
+    yellow: clamp(0, 100, Math.round(param(k, 1, y) * 100)),
+    key: clamp(0, 100, Math.round(k * 100)),
+  }
+}
 
 export const fromRgb = ({ red = 0, green = 0, blue = 0 } = {}) =>
   Color({ r: red / 255, g: green / 255, b: blue / 255 })
@@ -97,15 +109,17 @@ export const fromHsl = ({ hue = 0, saturation = 0, lightness = 0 } = {}) => {
   return Color({ r: r + m, g: g + m, b: b + m })
 }
 
+export const fromCmyk = ({ cyan = 0, magenta = 0, yellow = 0, key = 0 } = {}) => {
+  const c = clamp(0, 1, cyan / 100)
+  const m = clamp(0, 1, magenta / 100)
+  const y = clamp(0, 1, yellow / 100)
+  const k = clamp(0, 1, key / 100)
 
-export const rgbString = (color) => {
-  let { red, green, blue } = rgb(color)
-  return `rgb(${red}, ${green}, ${blue})`
-}
-
-export const hslString = (color) => {
-  let { hue, saturation, lightness } = hsl(color)
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`
+  return Color({
+    r: 1 - interpolate(k, 1, c),
+    g: 1 - interpolate(k, 1, m),
+    b: 1 - interpolate(k, 1, y),
+  })
 }
 
 // Utils
