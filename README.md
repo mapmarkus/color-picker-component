@@ -1,11 +1,13 @@
 # Color Picker Component
 
-Color picker component using React + Redux
+Color picker component:
 
 ![Demo](screencapture.gif)
 
-**Note**: I've built this to learn React + Redux, it's not an actual usable
-component 😔.
+Supports RGB, HSL and CMYK color spaces.
+
+**Note**: CMYK is obtained from RGB, is not suitable for choosing print colors.
+
 
 ## Stack
 
