@@ -1,5 +1,5 @@
 {
-  "name": "colour-picker",
+  "name": "color-picker-component",
   "version": "0.0.1",
   "scripts": {
     "start": "vite",
