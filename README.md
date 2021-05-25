@@ -2,6 +2,8 @@
 
 Color picker component:
 
+[Live Demo](https://mapmarkus.github.io/color-picker-component/)
+
 ![Demo](screencapture.gif)
 
 Supports RGB, HSL and CMYK color spaces.
