@@ -17,7 +17,7 @@ export default function Slider({ min, max, value, toColor, update, stops = [], o
     setDragging(true)
     setDrag([value, x, x])
   }
-  const dragTo = (x) => setDrag([drag[0], drag[1], x])
+  const dragTo = ({ pageX }) => setDrag([drag[0], drag[1], pageX])
   const getPostion = () => {
     if (dragging) {
       let [v, x0, x1] = drag
@@ -32,14 +32,22 @@ export default function Slider({ min, max, value, toColor, update, stops = [], o
     setWidth(sliderRef.current.offsetWidth)
   }, [width])
 
+  const removeListeners = () => {
+    document.body.classList.remove("cursor-[grabbing]")
+    window.removeEventListener('mouseup', cancelDrag)
+    window.removeEventListener('mousemove', dragTo)
+  }
+
   useEffect(() => {
     if (dragging) {
       document.body.classList.add("cursor-[grabbing]")
       window.addEventListener('mouseup', cancelDrag)
+      window.addEventListener('mousemove', dragTo)
+
+      return removeListeners
     }
     else {
-      document.body.classList.remove("cursor-[grabbing]")
-      window.removeEventListener('mouseup', cancelDrag)
+      removeListeners()
     }
   }, [dragging])
 
@@ -55,7 +63,6 @@ export default function Slider({ min, max, value, toColor, update, stops = [], o
       ref={sliderRef}
       className="w-full h-5 relative"
       style={{ backgroundImage: `linear-gradient(to right, ${[min, ...stops, max].map((c) => hex(toColor(update(c)))).join(",")}` }}
-      onMouseMove={dragging ? (e) => dragTo(e.pageX) : null}
     >
       <span
         className={classnames(
