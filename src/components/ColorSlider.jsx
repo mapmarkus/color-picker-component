@@ -28,9 +28,10 @@ export default function Slider({ min, max, value, toColor, update, stops = [], o
     }
   }
 
+  // Get the component's width
   useEffect(() => {
     setWidth(sliderRef.current.offsetWidth)
-  }, [width])
+  }, [])
 
   const removeListeners = () => {
     document.body.classList.remove("cursor-[grabbing]")
